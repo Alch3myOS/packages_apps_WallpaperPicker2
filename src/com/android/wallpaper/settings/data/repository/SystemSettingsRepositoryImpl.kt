@@ -65,7 +65,7 @@ class SystemSettingsRepositoryImpl(
         return intSetting(name, if (defaultValue) 1 else 0).map { it != 0 }
     }
 
-    override fun stringSetting(name: String): Flow<String?> {
+    override fun stringSetting(name: String, defaultValue: String?): Flow<String?> {
         return callbackFlow {
                 val observer =
                     object : ContentObserver(null) {
@@ -83,7 +83,7 @@ class SystemSettingsRepositoryImpl(
 
                 awaitClose { contentResolver.unregisterContentObserver(observer) }
             }
-            .map { Settings.System.getString(contentResolver, name) }
+            .map { Settings.System.getString(contentResolver, name) ?: defaultValue }
             // The above work is done on the background thread (which is important for accessing
             // settings through the content resolver).
             .flowOn(backgroundDispatcher)
